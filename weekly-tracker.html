@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0b0c10;
+  --surf: #12141b;
+  --card: #191c26;
+  --card2: #1e2130;
+  --border: rgba(255,255,255,0.065);
+  --border2: rgba(255,255,255,0.12);
+  --gold: #d4a843;
+  --gold-dim: rgba(212,168,67,0.12);
+  --teal: #4db8aa;
+  --teal-dim: rgba(77,184,170,0.12);
+  --purple: #9b8cef;
+  --purple-dim: rgba(155,140,239,0.12);
+  --coral: #e07878;
+  --coral-dim: rgba(224,120,120,0.1);
+  --green: #6ab187;
+  --green-dim: rgba(106,177,135,0.12);
+  --text: #ddd9ce;
+  --text2: #8a877e;
+  --text3: #565450;
+  --serif: 'Crimson Pro', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* ── HEADER ── */
+.header {
+  background: var(--surf);
+  border-bottom: 1px solid var(--border);
+  padding: 20px 28px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.header-left h1 {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--text);
+}
+
+.header-left .week-info {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 2px;
+  letter-spacing: 0.05em;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.progress-ring-mini {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text2);
+}
+
+.progress-ring-mini span { color: var(--gold); font-weight: 500; }
+
+.btn {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 7px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border2);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.02em;
+}
+
+.btn:hover { background: var(--card2); border-color: var(--gold); color: var(--gold); }
+
+.btn-gold {
+  background: var(--gold-dim);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.btn-gold:hover { background: rgba(212,168,67,0.22); }
+
+/* ── TABS ── */
+.tabs {
+  display: flex;
+  gap: 0;
+  padding: 0 28px;
+  background: var(--surf);
+  border-bottom: 1px solid var(--border);
+}
+
+.tab {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 10px 18px;
+  border: none;
+  background: none;
+  color: var(--text3);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.tab:hover { color: var(--text2); }
+.tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+/* ── MAIN ── */
+.main { max-width: 900px; margin: 0 auto; padding: 28px 20px 60px; }
+
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ── DAY GRID ── */
+.day-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 650px) { .day-grid { grid-template-columns: 1fr; } }
+
+.day-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.day-card:hover { border-color: var(--border2); }
+
+.day-card.weekend { border-left: 3px solid var(--teal); }
+.day-card.weekday { border-left: 3px solid var(--purple); }
+
+.day-header {
+  padding: 14px 16px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+
+.day-name {
+  font-family: var(--serif);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.day-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-pill {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: var(--card2);
+  color: var(--text2);
+  letter-spacing: 0.04em;
+}
+
+.progress-pill.done { background: var(--green-dim); color: var(--green); }
+
+/* ── TIMELINE BAR ── */
+.timeline-bar {
+  display: flex;
+  height: 6px;
+  margin: 0;
+  overflow: hidden;
+}
+
+.tl-seg {
+  flex: 1;
+  transition: opacity 0.2s;
+}
+
+.tl-sleep { background: #2a2d38; }
+.tl-routine { background: #3a4060; }
+.tl-work { background: #4a5080; }
+.tl-study { background: var(--teal); }
+.tl-martial { background: var(--coral); }
+.tl-leisure { background: var(--purple); }
+.tl-social { background: var(--gold); opacity: 0.6; }
+.tl-meal { background: var(--green); opacity: 0.7; }
+
+/* ── TASKS ── */
+.day-tasks { padding: 12px 16px; }
+
+.section-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 8px;
+  margin-top: 10px;
+}
+
+.section-label:first-child { margin-top: 0; }
+
+.task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  cursor: pointer;
+}
+
+.task-item:last-child { border-bottom: none; }
+.task-item:hover { opacity: 0.9; }
+
+.task-item input[type="checkbox"] { display: none; }
+
+.checkbox-ui {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid var(--border2);
+  flex-shrink: 0;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  position: relative;
+}
+
+.task-item:hover .checkbox-ui { border-color: var(--text3); }
+
+.task-item input:checked + .checkbox-ui {
+  background: var(--teal);
+  border-color: var(--teal);
+}
+
+.task-item input:checked + .checkbox-ui::after {
+  content: '';
+  width: 9px;
+  height: 5px;
+  border-left: 1.5px solid #0b0c10;
+  border-bottom: 1.5px solid #0b0c10;
+  transform: rotate(-45deg) translate(1px, -1px);
+  display: block;
+}
+
+.task-item.type-study input:checked + .checkbox-ui { background: var(--teal); border-color: var(--teal); }
+.task-item.type-meal input:checked + .checkbox-ui { background: var(--green); border-color: var(--green); }
+.task-item.type-break input:checked + .checkbox-ui { background: var(--purple); border-color: var(--purple); }
+.task-item.type-leisure input:checked + .checkbox-ui { background: var(--gold); border-color: var(--gold); }
+.task-item.type-habit input:checked + .checkbox-ui { background: var(--text2); border-color: var(--text2); }
+
+.task-label {
+  flex: 1;
+}
+
+.task-time {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 0.03em;
+  display: block;
+  margin-bottom: 1px;
+}
+
+.task-name {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.task-item input:checked ~ .task-label .task-name {
+  color: var(--text3);
+  text-decoration: line-through;
+  text-decoration-color: var(--text3);
+}
+
+.task-tag {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-family: var(--mono);
+  flex-shrink: 0;
+  margin-top: 3px;
+  letter-spacing: 0.04em;
+}
+
+.tag-study { background: var(--teal-dim); color: var(--teal); }
+.tag-optional { background: rgba(255,255,255,0.05); color: var(--text3); }
+.tag-key { background: var(--gold-dim); color: var(--gold); }
+.tag-leisure { background: var(--purple-dim); color: var(--purple); }
+
+.day-note {
+  margin: 10px 16px 14px;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.025);
+  border-radius: 8px;
+  border-left: 2px solid var(--border2);
+  font-size: 12px;
+  color: var(--text2);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* ── TIME BUDGET ── */
+.budget-header {
+  margin-bottom: 24px;
+}
+
+.budget-header h2 {
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.budget-header p {
+  color: var(--text2);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.budget-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+@media (max-width: 600px) { .budget-grid { grid-template-columns: 1fr; } }
+
+.budget-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.budget-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.budget-card-title {
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.budget-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.budget-target {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 0.05em;
+}
+
+.budget-bar-wrap {
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px;
+  height: 6px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.budget-bar {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.5s ease;
+  min-width: 0;
+}
+
+.budget-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.budget-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: 1;
+}
+
+.budget-input-wrap label {
+  font-size: 11px;
+  color: var(--text3);
+  white-space: nowrap;
+}
+
+.budget-input {
+  width: 52px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 5px 8px;
+  outline: none;
+  text-align: center;
+}
+
+.budget-input:focus { border-color: var(--gold); }
+
+.budget-actual {
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.budget-note {
+  font-size: 11px;
+  color: var(--text3);
+}
+
+.rules-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 22px;
+  margin-bottom: 14px;
+}
+
+.rules-card h3 {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.rule-item {
+  display: flex;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.5;
+}
+
+.rule-item:last-child { border-bottom: none; }
+
+.rule-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  margin-top: 3px;
+  min-width: 18px;
+}
+
+/* ── SUMMARY ── */
+.summary-bar {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.summary-item { text-align: center; }
+
+.summary-num {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.summary-label {
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.sep { width: 1px; height: 36px; background: var(--border); flex-shrink: 0; }
+
+/* ── CONFIRM MODAL ── */
+.modal-bg {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+}
+.modal-bg.open { display: flex; }
+.modal {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  padding: 28px 30px;
+  max-width: 360px;
+  width: 90%;
+  text-align: center;
+}
+.modal h3 { font-family: var(--serif); font-size: 20px; margin-bottom: 8px; }
+.modal p { font-size: 13px; color: var(--text2); margin-bottom: 20px; line-height: 1.6; }
+.modal-btns { display: flex; gap: 10px; justify-content: center; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-size: 13px;
+  color: var(--teal);
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+  transform: translateY(80px);
+  opacity: 0;
+  transition: all 0.3s;
+  z-index: 500;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<div class="modal-bg" id="resetModal">
+  <div class="modal">
+    <h3>Reset week?</h3>
+    <p>All checkboxes and time budget entries for this week will be cleared. This can't be undone.</p>
+    <div class="modal-btns">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-gold" onclick="confirmReset()">Reset week</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Week reset ✓</div>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Weekly Tracker</h1>
+    <div class="week-info" id="weekInfo">Loading...</div>
+  </div>
+  <div class="header-right">
+    <div class="progress-ring-mini">
+      <span id="headerProgress">0</span> / <span id="headerTotal">0</span> tasks
+    </div>
+    <button class="btn btn-gold" onclick="openModal()">↺ Reset week</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('schedule', this)">Schedule</button>
+  <button class="tab" onclick="switchTab('budget', this)">Time Budget</button>
+  <button class="tab" onclick="switchTab('rules', this)">Principles</button>
+</div>
+
+<div class="main">
+
+  <!-- SCHEDULE PANEL -->
+  <div class="panel active" id="panel-schedule">
+
+    <div class="summary-bar">
+      <div class="summary-item">
+        <div class="summary-num" id="sumStudy" style="color:var(--teal)">0h</div>
+        <div class="summary-label">CS Studied</div>
+      </div>
+      <div class="sep"></div>
+      <div class="summary-item">
+        <div class="summary-num" id="sumTarget" style="color:var(--text2)">8.5h</div>
+        <div class="summary-label">Weekly Target</div>
+      </div>
+      <div class="sep"></div>
+      <div class="summary-item">
+        <div class="summary-num" id="sumDone" style="color:var(--gold)">0</div>
+        <div class="summary-label">Tasks Done</div>
+      </div>
+      <div class="sep"></div>
+      <div class="summary-item">
+        <div class="summary-num" id="sumStreak" style="color:var(--purple)">0</div>
+        <div class="summary-label">Day Streak</div>
+      </div>
+    </div>
+
+    <div class="day-grid" id="dayGrid">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+
+  <!-- BUDGET PANEL -->
+  <div class="panel" id="panel-budget">
+    <div class="budget-header">
+      <h2>Time Budget</h2>
+      <p>Track where your hours go. Rewards only after productive time is fulfilled.</p>
+    </div>
+
+    <div class="budget-grid" id="budgetGrid">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+
+  <!-- RULES PANEL -->
+  <div class="panel" id="panel-rules">
+    <div class="rules-card">
+      <h3>Core Principles</h3>
+      <div class="rule-item"><div class="rule-num">01</div><div>Study is non-negotiable — even 30 min of focused work beats 2 hours of distracted browsing. Show up daily.</div></div>
+      <div class="rule-item"><div class="rule-num">02</div><div>Leisure after work on free evenings is mandatory — it's not laziness, it's recovery. Without it, everything degrades.</div></div>
+      <div class="rule-item"><div class="rule-num">03</div><div>Gaming and passive rewards only unlock after reading + study goals for the day are checked off.</div></div>
+      <div class="rule-item"><div class="rule-num">04</div><div>Lunch break: eat first (30 min), then study (30 min), then real break away from screens (30 min). Don't skip the break.</div></div>
+      <div class="rule-item"><div class="rule-num">05</div><div>Morning study (before 9am) is optional — only do it if you arrived early and feel sharp. Never force it at the cost of Muay Thai or sleep.</div></div>
+      <div class="rule-item"><div class="rule-num">06</div><div>Weekends are your long study sessions. Protect the morning 1h and afternoon 1h. These are the hardest topics of the week.</div></div>
+      <div class="rule-item"><div class="rule-num">07</div><div>Socializing (quality time with people you care about) counts as productive time — it's not wasted.</div></div>
+      <div class="rule-item"><div class="rule-num">08</div><div>Reading before sleep instead of screens. Even 20 pages counts. The habit compounds faster than you think.</div></div>
+    </div>
+
+    <div class="rules-card">
+      <h3>Time Budget Rules</h3>
+      <div class="rule-item"><div class="rule-num">→</div><div><strong>Study Session:</strong> 8.5h/week target. Spread across 7 days. Never crammed.</div></div>
+      <div class="rule-item"><div class="rule-num">→</div><div><strong>Reading:</strong> 3.5h/week (30 min/day). Books over feeds. Nonfiction + occasional fiction.</div></div>
+      <div class="rule-item"><div class="rule-num">→</div><div><strong>Exercise:</strong> Already built in (Muay Thai, Kung Fu, Tricking). Don't count walking the dog.</div></div>
+      <div class="rule-item"><div class="rule-num">→</div><div><strong>Socializing:</strong> 3h/week minimum. Real conversations, not group chats.</div></div>
+      <div class="rule-item"><div class="rule-num">→</div><div><strong>Gaming/passive leisure:</strong> ≤ 3h/week. Only after daily productive goals are met.</div></div>
+      <div class="rule-item"><div class="rule-num">→</div><div><strong>Doom-scrolling:</strong> Target 0. Every minute here is stolen from something that matters.</div></div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+
+const DAYS = [
+  {
+    id: 'mon', name: 'Monday', type: 'weekday',
+    timeline: ['sleep','sleep','sleep','sleep','sleep','sleep','routine','routine','routine','routine','routine','work','work','work','work','study','work','work','work','work','martial','martial','martial','leisure','leisure','leisure','leisure','sleep','sleep','sleep','sleep','sleep','sleep','sleep','sleep','sleep'],
+    note: 'Kung Fu 19:30–21:00 blocks your evening. Lunch window is your main study slot.',
+    tasks: [
+      { id:'mon_m', type:'study', time:'08:30–09:00', name:'Morning Study Session (if you arrive early)', tag:'optional', mins:30 },
+      { id:'mon_e', type:'meal', time:'12:30–13:00', name:'Eat lunch — step away from desk', tag:null, mins:0 },
+      { id:'mon_s', type:'study', time:'13:00–13:30', name:'Study Session — focused 30 min', tag:'study', mins:30 },
+      { id:'mon_b', type:'break', time:'13:30–14:00', name:'Break — walk, no screens', tag:null, mins:0 },
+      { id:'mon_r', type:'habit', time:'22:30–23:00', name:'Read before sleep', tag:null, mins:0 },
+    ]
+  },
+  {
+    id: 'tue', name: 'Tuesday', type: 'weekday',
+    timeline: ['sleep','sleep','sleep','sleep','sleep','sleep','routine','routine','routine','routine','routine','work','work','work','work','study','work','work','work','work','leisure','leisure','leisure','leisure','leisure','leisure','leisure','sleep','sleep','sleep','sleep','sleep','sleep','sleep','sleep','sleep'],
+    note: 'Free evening — use it for real leisure. No study pressure after 18:00.',
+    tasks: [
+      { id:'tue_m', type:'study', time:'08:30–09:00', name:'Morning Study Session (if you arrive early)', tag:'optional', mins:30 },
+      { id:'tue_e', type:'meal', time:'12:30–13:00', name:'Eat lunch — step away from desk', tag:null, mins:0 },
+      { id:'tue_s', type:'study', time:'13:00–13:30', name:'Study Session — focused 30 min', tag:'study', mins:30 },
+      { id:'tue_b', type:'break', time:'13:30–14:00', name:'Break — walk, no screens', tag:null, mins:0 },
+      { id:'tue_l', type:'leisure', time:'18:30–20:00', name:'1h+ leisure — recharge, do what you enjoy', tag:'leisure', mins:0 },
+      { id:'tue_r', type:'habit', time:'22:30–23:00', name:'Read before sleep', tag:null, mins:0 },
+    ]
+  },
+  {
+    id: 'wed', name: 'Wednesday', type: 'weekday',
+    timeline: ['sleep','sleep','sleep','sleep','sleep','sleep','routine','routine','routine','routine','routine','work','work','work','work','study','work','work','work','work','martial','martial','martial','leisure','leisure','leisure','leisure','sleep','sleep','sleep','sleep','sleep','sleep','sleep','sleep','sleep'],
+    note: 'Mirror of Monday. Kung Fu takes the evening. Lunch is your window.',
+    tasks: [
+      { id:'wed_m', type:'study', time:'08:30–09:00', name:'Morning Study Session (if you arrive early)', tag:'optional', mins:30 },
+      { id:'wed_e', type:'meal', time:'12:30–13:00', name:'Eat lunch — step away from desk', tag:null, mins:0 },
+      { id:'wed_s', type:'study', time:'13:00–13:30', name:'Study Session — focused 30 min', tag:'study', mins:30 },
+      { id:'wed_b', type:'break', time:'13:30–14:00', name:'Break — walk, no screens', tag:null, mins:0 },
+      { id:'wed_r', type:'habit', time:'22:30–23:00', name:'Read before sleep', tag:null, mins:0 },
+    ]
+  },
+  {
+    id: 'thu', name: 'Thursday', type: 'weekday',
+    timeline: ['sleep','sleep','sleep','sleep','sleep','sleep','routine','routine','routine','routine','routine','work','work','work','work','study','work','work','work','martial','martial','martial','leisure','leisure','leisure','leisure','leisure','sleep','sleep','sleep','sleep','sleep','sleep','sleep','sleep','sleep'],
+    note: 'Tricking 18:30–20:00. Lunch is your main slot. No evening study.',
+    tasks: [
+      { id:'thu_m', type:'study', time:'08:30–09:00', name:'Morning Study Session (if you arrive early)', tag:'optional', mins:30 },
+      { id:'thu_e', type:'meal', time:'12:30–13:00', name:'Eat lunch — step away from desk', tag:null, mins:0 },
+      { id:'thu_s', type:'study', time:'13:00–13:30', name:'Study Session — focused 30 min', tag:'study', mins:30 },
+      { id:'thu_b', type:'break', time:'13:30–14:00', name:'Break — walk, no screens', tag:null, mins:0 },
+      { id:'thu_r', type:'habit', time:'22:30–23:00', name:'Read before sleep', tag:null, mins:0 },
+    ]
+  },
+  {
+    id: 'fri', name: 'Friday', type: 'weekday',
+    timeline: ['sleep','sleep','sleep','sleep','sleep','sleep','routine','routine','routine','routine','routine','work','work','work','work','study','work','work','work','work','leisure','leisure','leisure','leisure','leisure','leisure','leisure','sleep','sleep','sleep','sleep','sleep','sleep','sleep','sleep','sleep'],
+    note: 'Free evening — genuine rest. You\'ve earned it. No guilt, no study.',
+    tasks: [
+      { id:'fri_m', type:'study', time:'08:30–09:00', name:'Morning Study Session (if you arrive early)', tag:'optional', mins:30 },
+      { id:'fri_e', type:'meal', time:'12:30–13:00', name:'Eat lunch — step away from desk', tag:null, mins:0 },
+      { id:'fri_s', type:'study', time:'13:00–13:30', name:'Study Session — focused 30 min', tag:'study', mins:30 },
+      { id:'fri_b', type:'break', time:'13:30–14:00', name:'Break — walk, no screens', tag:null, mins:0 },
+      { id:'fri_l', type:'leisure', time:'18:30–21:00', name:'1h+ leisure — film, walk, game, anything', tag:'leisure', mins:0 },
+      { id:'fri_r', type:'habit', time:'22:30–23:00', name:'Read before sleep', tag:null, mins:0 },
+    ]
+  },
+  {
+    id: 'sat', name: 'Saturday', type: 'weekend',
+    timeline: ['sleep','sleep','sleep','sleep','sleep','routine','routine','study','study','work','work','work','meal','meal','work','work','study','study','martial','martial','leisure','leisure','leisure','leisure','leisure','leisure','leisure','sleep','sleep','sleep','sleep','sleep','sleep','sleep','sleep','sleep'],
+    note: 'Weekend power day — 2h total Study Session. Use mornings when your mind is fresh.',
+    tasks: [
+      { id:'sat_s1', type:'study', time:'09:00–10:00', name:'Morning Study Session — 1 hour', tag:'key', mins:60 },
+      { id:'sat_e', type:'meal', time:'12:30–13:00', name:'Eat lunch', tag:null, mins:0 },
+      { id:'sat_s2', type:'study', time:'15:30–16:30', name:'Afternoon Study Session — 1 hour', tag:'key', mins:60 },
+      { id:'sat_l', type:'leisure', time:'17:00–18:00', name:'Leisure / reward window', tag:'leisure', mins:0 },
+      { id:'sat_r', type:'habit', time:'22:30–23:00', name:'Read before sleep', tag:null, mins:0 },
+    ]
+  },
+  {
+    id: 'sun', name: 'Sunday', type: 'weekend',
+    timeline: ['sleep','sleep','sleep','sleep','sleep','routine','routine','study','study','work','work','work','meal','meal','work','work','study','study','leisure','leisure','leisure','leisure','leisure','leisure','leisure','leisure','leisure','sleep','sleep','sleep','sleep','sleep','sleep','sleep','sleep','sleep'],
+    note: 'Lightest day. Tackle the hardest CS topics here — long, deep focus sessions.',
+    tasks: [
+      { id:'sun_s1', type:'study', time:'09:00–10:00', name:'Morning Study Session — 1 hour', tag:'key', mins:60 },
+      { id:'sun_e', type:'meal', time:'12:30–13:00', name:'Eat lunch', tag:null, mins:0 },
+      { id:'sun_s2', type:'study', time:'15:00–16:00', name:'Afternoon Study Session — 1 hour', tag:'key', mins:60 },
+      { id:'sun_l', type:'leisure', time:'16:30–18:00', name:'Leisure / walk / social', tag:'leisure', mins:0 },
+      { id:'sun_r', type:'habit', time:'22:30–23:00', name:'Read before sleep', tag:null, mins:0 },
+    ]
+  },
+];
+
+const BUDGET_CATS = [
+  { id:'reading', label:'Reading', color:'#d4a843', target:'3.5h', targetH:3.5, note:'30 min/day · books over feeds' },
+  { id:'social',  label:'Socializing', color:'#9b8cef', target:'3h+', targetH:3, note:'real conversations, not chats' },
+  { id:'gaming',  label:'Gaming / Passive leisure', color:'#e07878', target:'≤3h', targetH:3, note:'only after daily goals are met', cap:true },
+  { id:'scroll',  label:'Doom-scrolling', color:'#565450', target:'0h', targetH:0, note:'target zero · track honestly', cap:true },
+];
+
+// ─── STORAGE ──────────────────────────────────────────────────────────────────
+
+function getWeekKey() {
+  const d = new Date();
+  const jan1 = new Date(d.getFullYear(), 0, 1);
+  const week = Math.ceil(((d - jan1) / 86400000 + jan1.getDay() + 1) / 7);
+  return `tracker_w${week}_${d.getFullYear()}`;
+}
+
+function loadState() {
+  try { return JSON.parse(localStorage.getItem(getWeekKey())) || {}; }
+  catch { return {}; }
+}
+
+function saveState(state) {
+  localStorage.setItem(getWeekKey(), JSON.stringify(state));
+}
+
+let STATE = loadState();
+
+// ─── WEEK INFO ─────────────────────────────────────────────────────────────
+
+function getWeekDates() {
+  const now = new Date();
+  const day = now.getDay();
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  const fmt = (d) => d.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+  return { start: fmt(monday), end: fmt(sunday) };
+}
+
+function initHeader() {
+  const d = new Date();
+  const jan1 = new Date(d.getFullYear(), 0, 1);
+  const week = Math.ceil(((d - jan1) / 86400000 + jan1.getDay() + 1) / 7);
+  const {start, end} = getWeekDates();
+  document.getElementById('weekInfo').textContent = `Week ${week} · ${start} – ${end}`;
+}
+
+// ─── RENDER SCHEDULE ─────────────────────────────────────────────────────────
+
+function renderSchedule() {
+  const grid = document.getElementById('dayGrid');
+  grid.innerHTML = '';
+
+  DAYS.forEach(day => {
+    const card = document.createElement('div');
+    card.className = `day-card ${day.type}`;
+
+    // Count tasks & done
+    const checkable = day.tasks.filter(t => t.type !== 'meal' && t.type !== 'break');
+    const doneCount = checkable.filter(t => STATE[t.id]).length;
+    const pillClass = doneCount === checkable.length && checkable.length > 0 ? 'done' : '';
+
+    // Timeline
+    const tlHTML = day.timeline.map(seg => `<div class="tl-seg tl-${seg}"></div>`).join('');
+
+    // Tasks
+    let taskHTML = '';
+    let lastSection = null;
+
+    day.tasks.forEach(task => {
+      const section = task.type === 'habit' ? 'daily habit' :
+                      task.type === 'leisure' ? 'leisure' :
+                      task.type === 'meal' || task.type === 'break' ? 'lunch block' : 'Study Session';
+
+      if (section !== lastSection) {
+        taskHTML += `<div class="section-label">${section}</div>`;
+        lastSection = section;
+      }
+
+      const checked = STATE[task.id] ? 'checked' : '';
+      const tagHTML = task.tag ? `<span class="task-tag tag-${task.tag}">${task.tag}</span>` : '';
+
+      taskHTML += `
+        <label class="task-item type-${task.type}">
+          <input type="checkbox" ${checked} onchange="toggleTask('${task.id}', this.checked)">
+          <div class="checkbox-ui"></div>
+          <div class="task-label">
+            <span class="task-time">${task.time}</span>
+            <span class="task-name">${task.name}</span>
+          </div>
+          ${tagHTML}
+        </label>`;
+    });
+
+    card.innerHTML = `
+      <div class="day-header">
+        <div class="day-name">${day.name}</div>
+        <div class="day-meta">
+          <div class="progress-pill ${pillClass}">${doneCount}/${checkable.length}</div>
+        </div>
+      </div>
+      <div class="timeline-bar">${tlHTML}</div>
+      <div class="day-tasks">${taskHTML}</div>
+      <div class="day-note">${day.note}</div>
+    `;
+
+    grid.appendChild(card);
+  });
+
+  updateSummary();
+}
+
+// ─── RENDER BUDGET ────────────────────────────────────────────────────────────
+
+function renderBudget() {
+  const grid = document.getElementById('budgetGrid');
+  grid.innerHTML = '';
+
+  // Auto Study Session hours
+  let csMinutes = 0;
+  DAYS.forEach(day => {
+    day.tasks.forEach(t => {
+      if (t.type === 'study' && t.mins > 0 && STATE[t.id]) csMinutes += t.mins;
+    });
+  });
+  const csHours = (csMinutes / 60).toFixed(1);
+
+  // CS card (auto)
+  const csPct = Math.min(100, (csMinutes/60 / 8.5) * 100);
+  const csCol = csPct >= 100 ? '#6ab187' : csPct >= 50 ? '#4db8aa' : '#d4a843';
+  const csCard = document.createElement('div');
+  csCard.className = 'budget-card';
+  csCard.innerHTML = `
+    <div class="budget-card-header">
+      <div class="budget-card-title">
+        <div class="budget-dot" style="background:#4db8aa"></div>
+        Study Session
+      </div>
+      <div class="budget-target">TARGET 8.5h</div>
+    </div>
+    <div class="budget-bar-wrap">
+      <div class="budget-bar" style="width:${csPct}%;background:${csCol}"></div>
+    </div>
+    <div class="budget-actual" style="color:${csCol}">${csHours}h</div>
+    <div class="budget-note">Auto-tracked from schedule checkboxes</div>
+  `;
+  grid.appendChild(csCard);
+
+  // Exercise card (auto from martial arts)
+  const martialDays = ['mon','wed','thu','sat'].filter(d => {
+    const day = DAYS.find(x => x.id === d);
+    return day && day.tasks.some(t => STATE[t.id]);
+  }).length;
+  const exHours = (martialDays * 1.5).toFixed(1);
+  const exPct = Math.min(100, (martialDays / 4) * 100);
+  const exCard = document.createElement('div');
+  exCard.className = 'budget-card';
+  exCard.innerHTML = `
+    <div class="budget-card-header">
+      <div class="budget-card-title">
+        <div class="budget-dot" style="background:#6ab187"></div>
+        Exercise
+      </div>
+      <div class="budget-target">TARGET 4+ SESSIONS</div>
+    </div>
+    <div class="budget-bar-wrap">
+      <div class="budget-bar" style="width:${exPct}%;background:#6ab187"></div>
+    </div>
+    <div class="budget-actual" style="color:#6ab187">~${exHours}h</div>
+    <div class="budget-note">Muay Thai · Kung Fu · Tricking (estimated)</div>
+  `;
+  grid.appendChild(exCard);
+
+  // Manual categories
+  BUDGET_CATS.forEach(cat => {
+    const stored = parseFloat(STATE[`budget_${cat.id}`]) || 0;
+    const pct = cat.targetH > 0 ? Math.min(100, (stored / cat.targetH) * 100) : (stored > 0 ? 100 : 0);
+    const isOver = cat.cap && stored > cat.targetH && cat.targetH > 0;
+    const barCol = isOver ? '#e07878' : cat.color;
+
+    const c = document.createElement('div');
+    c.className = 'budget-card';
+    c.innerHTML = `
+      <div class="budget-card-header">
+        <div class="budget-card-title">
+          <div class="budget-dot" style="background:${cat.color}"></div>
+          ${cat.label}
+        </div>
+        <div class="budget-target">TARGET ${cat.target}</div>
+      </div>
+      <div class="budget-bar-wrap">
+        <div class="budget-bar" id="bar_${cat.id}" style="width:${pct}%;background:${barCol}"></div>
+      </div>
+      <div class="budget-inputs">
+        <div class="budget-input-wrap">
+          <label>Hours this week:</label>
+          <input type="number" class="budget-input" id="bi_${cat.id}" min="0" max="40" step="0.5" value="${stored}"
+            oninput="saveBudget('${cat.id}', this.value, ${cat.targetH}, ${cat.cap||false}, '${cat.color}')">
+        </div>
+      </div>
+      <div class="budget-note" style="margin-top:6px">${cat.note}</div>
+    `;
+    grid.appendChild(c);
+  });
+}
+
+function saveBudget(id, val, targetH, cap, color) {
+  STATE[`budget_${id}`] = parseFloat(val) || 0;
+  saveState(STATE);
+  const v = parseFloat(val) || 0;
+  const pct = targetH > 0 ? Math.min(100, (v / targetH) * 100) : (v > 0 ? 100 : 0);
+  const isOver = cap && v > targetH && targetH > 0;
+  const bar = document.getElementById(`bar_${id}`);
+  if (bar) { bar.style.width = pct + '%'; bar.style.background = isOver ? '#e07878' : color; }
+}
+
+// ─── SUMMARY ─────────────────────────────────────────────────────────────────
+
+function updateSummary() {
+  let csMin = 0, total = 0, done = 0;
+
+  DAYS.forEach(day => {
+    day.tasks.forEach(t => {
+      if (t.type !== 'meal' && t.type !== 'break') {
+        total++;
+        if (STATE[t.id]) {
+          done++;
+          if (t.type === 'study' && t.mins > 0) csMin += t.mins;
+        }
+      }
+    });
+  });
+
+  const csH = (csMin / 60).toFixed(1);
+  document.getElementById('sumStudy').textContent = csH + 'h';
+  document.getElementById('sumDone').textContent = done;
+  document.getElementById('headerProgress').textContent = done;
+  document.getElementById('headerTotal').textContent = total;
+
+  // Streak: consecutive days from Monday where at least 1 study task done
+  let streak = 0;
+  for (const day of DAYS) {
+    const hasStudy = day.tasks.some(t => t.type === 'study' && STATE[t.id]);
+    if (hasStudy) streak++; else break;
+  }
+  document.getElementById('sumStreak').textContent = streak;
+}
+
+// ─── INTERACTIONS ─────────────────────────────────────────────────────────────
+
+function toggleTask(id, checked) {
+  STATE[id] = checked;
+  saveState(STATE);
+  updateSummary();
+
+  // Refresh day progress pill
+  DAYS.forEach(day => {
+    if (day.tasks.some(t => t.id === id)) {
+      const checkable = day.tasks.filter(t => t.type !== 'meal' && t.type !== 'break');
+      const doneCount = checkable.filter(t => STATE[t.id]).length;
+      const cards = document.querySelectorAll('.day-card');
+      const idx = DAYS.indexOf(day);
+      if (cards[idx]) {
+        const pill = cards[idx].querySelector('.progress-pill');
+        if (pill) {
+          pill.textContent = `${doneCount}/${checkable.length}`;
+          pill.className = `progress-pill ${doneCount === checkable.length ? 'done' : ''}`;
+        }
+      }
+    }
+  });
+
+  // Update budget if active
+  if (document.getElementById('panel-budget').classList.contains('active')) {
+    renderBudget();
+  }
+}
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'budget') renderBudget();
+}
+
+function openModal() {
+  document.getElementById('resetModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('resetModal').classList.remove('open');
+}
+
+function confirmReset() {
+  localStorage.removeItem(getWeekKey());
+  STATE = {};
+  closeModal();
+  renderSchedule();
+  if (document.getElementById('panel-budget').classList.contains('active')) renderBudget();
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+
+initHeader();
+renderSchedule();
+</script>
+</body>
+</html>
